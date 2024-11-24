@@ -1,7 +1,6 @@
 #ifndef DES_H
 #define DES_H
 
-
 #include<vector>
 #include<string>
 #include <stdint.h>
@@ -140,6 +139,7 @@ public:
     vector<vector<uint8_t>> generateKeysForEncryption(const string& key);
     vector<vector<uint8_t>> generateKeysForDecryption(const string& key);
     vector<uint8_t> xorVectors(const vector<uint8_t>& v1, const vector<uint8_t>& v2);
+    vector<uint8_t> modularAddition(const vector<uint8_t>& v1, const vector<uint8_t>& v2);
     vector<uint8_t> sbox(const vector<uint8_t>& input);
     string encryption(const string &input, const string& key);
     string decryption(const string &input, const string& key);

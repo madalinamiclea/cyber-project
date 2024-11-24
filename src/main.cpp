@@ -4,9 +4,8 @@
 using namespace std;
 
 int main() {
-    cout << "hello" << endl;
     DES des;
-    string text = "ana are mere";
+    string text = "ana are mere si";
     string key = "anaareme";
     string encryptedText = des.encryption(text, key);
     cout << "encryption (hex): " << encryptedText << endl;

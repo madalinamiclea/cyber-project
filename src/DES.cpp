@@ -168,6 +168,18 @@ vector<uint8_t> DES::xorVectors(const vector<uint8_t>& v1, const vector<uint8_t>
     return result;
 }
 
+vector<uint8_t> DES::modularAddition(const vector<uint8_t>& v1, const vector<uint8_t>& v2)
+{
+    vector<uint8_t> result(v1.size());
+    uint8_t carry = 0;
+    for (int i = v1.size() - 1; i >= 0; --i) {
+        uint16_t sum = static_cast<uint16_t>(v1[i]) + static_cast<uint16_t>(v2[i]) + carry;
+        result[i] = static_cast<uint8_t>(sum % 256);
+        carry = sum / 256;
+    }
+    return result;
+}
+
 vector<uint8_t> DES::sbox(const vector<uint8_t>& input)
 {
     vector<uint8_t> result(32);
@@ -232,6 +244,7 @@ string DES::encryption(const string &input, const string& key)
     vector<uint8_t> intermediate;
     vector<vector<uint8_t>> binaryMessages = splitMessageToBlocks(paddedInput);
     vector<vector<uint8_t>> keys = generateKeysForEncryption(key);
+    vector<uint8_t> keyRight = toBinary(key.substr(key.size() / 2));
     for(vector<uint8_t> message: binaryMessages) {
         message = initialPermutation(message);
         vector<uint8_t> left(message.begin(), message.begin() + 32);
@@ -240,6 +253,8 @@ string DES::encryption(const string &input, const string& key)
             vector<uint8_t> aux = right;
             aux = expansion(aux);
             aux = xorVectors(aux, keys[i-1]);
+            vector<uint8_t> k2 = xorVectors(keyRight, {static_cast<uint8_t>(i)});
+            aux = modularAddition(aux, k2);
             aux = sbox(aux);
             aux = pPermutation(aux);
             aux = xorVectors(aux, left);
@@ -262,6 +277,7 @@ string DES::decryption(const string &input, const string& key)
     vector<uint8_t> intermediate;
     vector<vector<uint8_t>> binaryMessages = splitMessageToBlocks(toText(fromHex(input))); 
     vector<vector<uint8_t>> keys = generateKeysForDecryption(key);
+    vector<uint8_t> keyRight = toBinary(key.substr(key.size() / 2));
 
     for(vector<uint8_t> message: binaryMessages) {
         message = initialPermutation(message);
@@ -272,6 +288,8 @@ string DES::decryption(const string &input, const string& key)
             vector<uint8_t> aux = right;
             aux = expansion(aux);
             aux = xorVectors(aux, keys[i-1]);
+            vector<uint8_t> k2 = xorVectors(keyRight, {static_cast<uint8_t>(i)});
+            aux = modularAddition(aux, k2);
             aux = sbox(aux);
             aux = pPermutation(aux);
             aux = xorVectors(aux, left);

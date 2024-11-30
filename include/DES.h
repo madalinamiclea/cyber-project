@@ -50,23 +50,13 @@ private:
         28, 29, 30, 31, 32, 1
     };
 
-    const unsigned int PC1[56] = {
-        57, 49, 41, 33, 25, 17, 9, 1,
-        58, 50, 42, 34, 26, 18, 10, 2,
-        59, 51, 43, 35, 27, 19, 11, 3,
-        60, 52, 44, 36, 63, 55, 47, 39,
-        31, 23, 15, 7, 62, 54, 46, 38,
-        30, 22, 14, 6, 61, 53, 45, 37,
-        29, 21, 13, 5, 28, 20, 12, 4
-    };
-
     const unsigned int PC2[48] = {
-        14, 17, 11, 24, 1, 5, 3, 28,
-        15, 6, 21, 10, 23, 19, 12, 4,
-        26, 8, 16, 7, 27, 20, 13, 2,
-        41, 52, 31, 37, 47, 55, 30, 40,
-        51, 45, 33, 48, 44, 49, 39, 56,
-        34, 53, 46, 42, 50, 36, 29, 32
+        1,  3,  5,  7,  9,  11, 13, 15,
+        17, 19, 21, 23, 25, 27, 29, 31,  
+        33, 35, 37, 39, 41, 43, 45, 47,  
+        49, 51, 53, 55, 57, 59, 61, 63,  
+        2,  4,  6,  8, 10, 12, 14, 16,  
+        18, 20, 22, 24, 26, 28, 30, 32
     };
 
     const vector<vector<vector<int>>> sboxes = {
@@ -127,22 +117,17 @@ public:
     vector<uint8_t> finalPermutation(const vector<uint8_t> &input);
     vector<uint8_t> pPermutation(const vector<uint8_t> &input);
     vector<uint8_t> expansion(const vector<uint8_t> &input);
-    vector<uint8_t> PC1permutation(const vector<uint8_t> &input);
     vector<uint8_t> PC2Permutation(const vector<uint8_t> &input);
-    vector<uint8_t> rotateLeftBy1(vector<uint8_t> &input);
-    vector<uint8_t> rotateLeftBy2(vector<uint8_t> &input);
-    vector<uint8_t> rotateRightBy1(vector<uint8_t> &input);
-    vector<uint8_t> rotateRightBy2(vector<uint8_t> &input);
     vector<uint8_t> toBinary(const string &input);
     string toText(const vector<uint8_t> &input);
     vector<vector<uint8_t>> splitMessageToBlocks(const string& message);
-    vector<vector<uint8_t>> generateKeysForEncryption(const string& key);
-    vector<vector<uint8_t>> generateKeysForDecryption(const string& key);
+    vector<vector<uint8_t>> generateKeysForEncryption(const string& key, uint8_t constant);
+    vector<vector<uint8_t>> generateKeysForDecryption(const string& key, uint8_t constant);
     vector<uint8_t> xorVectors(const vector<uint8_t>& v1, const vector<uint8_t>& v2);
     vector<uint8_t> modularAddition(const vector<uint8_t>& v1, const vector<uint8_t>& v2);
     vector<uint8_t> sbox(const vector<uint8_t>& input);
-    string encryption(const string &input, const string& key);
-    string decryption(const string &input, const string& key);
+    string encryption(const string &input, const string& key, uint8_t constant);
+    string decryption(const string &input, const string& key, uint8_t constant);
 };
 
 

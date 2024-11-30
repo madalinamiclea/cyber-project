@@ -49,15 +49,6 @@ vector<uint8_t> DES::expansion(const vector<uint8_t> &input)
     return result;
 }
 
-vector<uint8_t> DES::PC1permutation(const vector<uint8_t> &input)
-{
-    vector<uint8_t> result(56);
-    for (int i = 0; i < 56; i++) {
-        result[i] = input[PC1[i]];
-    }
-    return result;
-}
-
 vector<uint8_t> DES::PC2Permutation(const vector<uint8_t> &input)
 {
     vector<uint8_t> result(48);
@@ -65,29 +56,6 @@ vector<uint8_t> DES::PC2Permutation(const vector<uint8_t> &input)
         result[i] = input[PC2[i]];
     }
     return result;
-}
-
-vector<uint8_t> DES::rotateLeftBy1(vector<uint8_t> &input)
-{
-    rotate(input.begin(), input.begin() + 1, input.end());
-    return input;
-}
-
-vector<uint8_t> DES::rotateLeftBy2(vector<uint8_t> &input)
-{
-    rotate(input.begin(), input.begin() + 2, input.end());
-    return input;
-}
-
-vector<uint8_t> DES::rotateRightBy1(vector<uint8_t> &input)
-{
-    rotate(input.rbegin(), input.rbegin() + 1, input.rend());
-    return input;
-}
-vector<uint8_t> DES::rotateRightBy2(vector<uint8_t> &input)
-{
-    rotate(input.rbegin(), input.rbegin() + 2, input.rend());
-    return input;
 }
 
 vector<uint8_t> DES::toBinary(const string &input)
@@ -135,24 +103,26 @@ vector<vector<uint8_t>> DES::splitMessageToBlocks(const string& message)
    return decryptedText;
 }
 
-vector<vector<uint8_t>> DES::generateKeysForEncryption(const string& key)
+vector<vector<uint8_t>> DES::generateKeysForEncryption(const string& key, uint8_t c)
 {
     vector<vector<uint8_t>> keys;
     vector<uint8_t> binaryKey = toBinary(key);
-    binaryKey = PC1permutation(binaryKey);
-    vector<uint8_t> left(binaryKey.begin(), binaryKey.begin() + 28);
-    vector<uint8_t> right(binaryKey.begin() + 28, binaryKey.end());
+    vector<uint8_t> KL(binaryKey.begin(), binaryKey.begin() + 32);
+    vector<uint8_t> KR(binaryKey.begin() + 32, binaryKey.end());
     for(int i=1; i<=16; i++) {
-        if(i == 1 || i == 2 || i == 9 || i == 16) {
-            left = rotateLeftBy1(left);
-            right = rotateLeftBy1(right);
+        rotate(KL.begin(), KL.begin() + (i % KL.size()), KL.end());
+        rotate(KR.begin(), KR.begin() + (i % KR.size()), KR.end());
+
+        uint8_t roundConst = static_cast<uint8_t>(i) ^ c;
+        for(size_t j = 0; j < KL.size(); ++j) {
+            KL[j] = KL[j] ^ roundConst;
         }
-        else {
-            left = rotateLeftBy2(left);
-            right = rotateLeftBy2(right);
+        for(size_t j = 0; j < KR.size(); ++j) {
+            KR[j] = KR[j] ^ roundConst;
         }
-        vector<uint8_t> key = left;
-        key.insert(key.end(), right.begin(), right.end());
+
+        vector<uint8_t> key = KL;
+        key.insert(key.end(), KR.begin(), KR.end());
         key = PC2Permutation(key);
         keys.push_back(key);
     }
@@ -199,9 +169,9 @@ vector<uint8_t> DES::sbox(const vector<uint8_t>& input)
     return result;
 }
 
-vector<vector<uint8_t>> DES::generateKeysForDecryption(const string& key)
+vector<vector<uint8_t>> DES::generateKeysForDecryption(const string& key, uint8_t constant)
 {
-    vector<vector<uint8_t>> keys = generateKeysForEncryption(key);
+    vector<vector<uint8_t>> keys = generateKeysForEncryption(key,  constant);
     reverse(keys.begin(), keys.end());
     return keys;
 }
@@ -237,13 +207,13 @@ string removePadding(const string &input)
     return input.substr(0, input.size() - padLength);
 }
 
-string DES::encryption(const string &input, const string& key)
+string DES::encryption(const string &input, const string& key, uint8_t constant)
 {
     string paddedInput = addPadding(input);
     vector<uint8_t> result;
     vector<uint8_t> intermediate;
     vector<vector<uint8_t>> binaryMessages = splitMessageToBlocks(paddedInput);
-    vector<vector<uint8_t>> keys = generateKeysForEncryption(key);
+    vector<vector<uint8_t>> keys = generateKeysForEncryption(key, constant);
     vector<uint8_t> keyRight = toBinary(key.substr(key.size() / 2));
     for(vector<uint8_t> message: binaryMessages) {
         message = initialPermutation(message);
@@ -271,12 +241,12 @@ string DES::encryption(const string &input, const string& key)
     return toHex(result);
 }
 
-string DES::decryption(const string &input, const string& key)
+string DES::decryption(const string &input, const string& key, uint8_t constant)
 {
     vector<uint8_t> result;
     vector<uint8_t> intermediate;
     vector<vector<uint8_t>> binaryMessages = splitMessageToBlocks(toText(fromHex(input))); 
-    vector<vector<uint8_t>> keys = generateKeysForDecryption(key);
+    vector<vector<uint8_t>> keys = generateKeysForDecryption(key, constant);
     vector<uint8_t> keyRight = toBinary(key.substr(key.size() / 2));
 
     for(vector<uint8_t> message: binaryMessages) {

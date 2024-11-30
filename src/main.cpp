@@ -7,9 +7,10 @@ int main() {
     DES des;
     string text = "ana are mere si";
     string key = "anaareme";
-    string encryptedText = des.encryption(text, key);
+    int constant = 80;
+    string encryptedText = des.encryption(text, key, static_cast<uint8_t>(constant));
     cout << "encryption (hex): " << encryptedText << endl;
-    string decryptedText = des.decryption(encryptedText, key);
+    string decryptedText = des.decryption(encryptedText, key, constant);
     cout << "decryption: " << decryptedText << endl;
     return 0;
 }
